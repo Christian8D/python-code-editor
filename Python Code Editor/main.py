@@ -21,6 +21,10 @@ def show_welcome() -> None:
 
 show_welcome()
 
+print("=" * 40)
+print("       WELCOME TO SMART FIT")
+print("=" * 40)
+
 age = int(input("Please write your Age: "))
 
 
