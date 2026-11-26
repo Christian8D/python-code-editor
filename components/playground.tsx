@@ -52,8 +52,10 @@ export function Playground({ initialCode }: PlaygroundProps) {
   const stdinRef = useRef<SharedArrayBuffer | null>(null);
   const interruptRef = useRef<SharedArrayBuffer | null>(null);
   const statusRef = useRef<SessionStatus>("loading");
-    const readyRef = useRef(false);
-    const pendingCodeRef = useRef<string | null>(initialCode);
+  const readyRef = useRef(false);
+  const pendingCodeRef = useRef<string | null>(
+    initialCode.trim().length > 0 ? initialCode : null,
+  );
   const codeRef = useRef(initialCode);
 
   useEffect(() => {
@@ -110,6 +112,9 @@ export function Playground({ initialCode }: PlaygroundProps) {
         const queued = pendingCodeRef.current;
         if (queued !== null) {
           startRun(queued);
+        } else {
+          statusRef.current = "stopped";
+          setStatus("stopped");
         }
         return;
       }
@@ -233,9 +238,9 @@ export function Playground({ initialCode }: PlaygroundProps) {
     <div className="flex h-full min-h-0 flex-col">
       <header className="flex flex-wrap items-center justify-between gap-4 border-b border-[#e4d8c8] px-4 py-3 sm:px-6">
         <div>
-          <h1 className="text-xl font-semibold tracking-tight">Cafecito Order Lab</h1>
+          <h1 className="text-xl font-semibold tracking-tight">Python Code Editor</h1>
           <p className="mt-1 max-w-2xl text-sm text-[#57534e]">
-            The register on the left runs the Python on the right, in your browser. Every item starts with 10 in stock.
+            Write Python on the right, then press Run. Output appears on the left in your browser.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -261,7 +266,15 @@ export function Playground({ initialCode }: PlaygroundProps) {
             onClick={() => {
               setCode(initialCode);
               codeRef.current = initialCode;
-              runCode(initialCode);
+              if (initialCode.trim().length > 0) {
+                runCode(initialCode);
+              } else {
+                requestStop();
+                setOutput("");
+                setAnswer("");
+                statusRef.current = "stopped";
+                setStatus("stopped");
+              }
             }}
           >
             Reset
@@ -269,10 +282,10 @@ export function Playground({ initialCode }: PlaygroundProps) {
         </div>
       </header>
       <div className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-2">
-        <section className="flex min-h-[28rem] flex-col border-b border-[#e4d8c8] lg:min-h-0 lg:border-r lg:border-b-0" aria-labelledby="register-heading">
+        <section className="flex min-h-[28rem] flex-col border-b border-[#e4d8c8] lg:min-h-0 lg:border-r lg:border-b-0" aria-labelledby="output-heading">
           <div className="flex items-center justify-between gap-3 border-b border-[#e4d8c8] px-4 py-3">
-            <h2 id="register-heading" className="text-sm font-semibold">
-              Register
+            <h2 id="output-heading" className="text-sm font-semibold">
+              Output
             </h2>
             <p className="text-sm text-[#57534e]" role="status">
               {STATUS_LABEL[status]}
@@ -332,7 +345,7 @@ export function Playground({ initialCode }: PlaygroundProps) {
             {!isBusy ? (
               <p className="mt-2 text-sm text-[#57534e]">
                 {status === "finished"
-                  ? "This order session has ended. Press Run to start again with 10 of each item."
+                  ? "The program finished. Press Run to start again."
                   : "Press Run to start the program again."}
               </p>
             ) : null}
@@ -341,10 +354,14 @@ export function Playground({ initialCode }: PlaygroundProps) {
         <section className="flex min-h-[28rem] flex-col bg-[#1c1917] text-[#f5f5f4] lg:min-h-0" aria-labelledby="code-heading">
           <div className="flex items-center justify-between gap-3 border-b border-[#44403c] px-4 py-3">
             <h2 id="code-heading" className="text-sm font-semibold">
-              cafe_order.py
+              Python Code Editor
             </h2>
             <p className="text-sm text-[#a8a29e]">
-              {code === initialCode ? "Class program" : "Edited. Run uses this copy."}
+              {code.trim().length === 0
+                ? "Empty. Type or paste Python, then press Run."
+                : code === initialCode
+                  ? "Saved starter file"
+                  : "Edited. Run uses this copy."}
             </p>
           </div>
           <div className="flex min-h-0 flex-1">

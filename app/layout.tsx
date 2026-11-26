@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Cafecito Order Lab",
-  description: "Run the cafecito order program in the browser and read the Python beside it.",
+  title: "Python Code Editor",
+  description: "Write and run Python in the browser with the Python Code Editor.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
