@@ -1,20 +1,3 @@
-"""Café register: manage orders and inventory."""
-
-STARTING_STOCK = 10
-
-# Menu items and their prices
-menu_items = {
-    "cappuccino": 5.00,
-    "latte": 4.50,
-    "espresso": 3.00,
-    "americano": 3.00,
-    "sandwich": 7.50,
-}
-
-# Each item starts with 10 units in stock
-stock = {item: STARTING_STOCK for item in menu_items}
-
-
 def show_welcome() -> None:
     """Show a quick terminal-style welcome for Unit 2."""
     print(
@@ -36,191 +19,86 @@ def show_welcome() -> None:
     )
 
 
-def show_menu() -> None:
-    """Display menu prices and remaining inventory."""
-    print("\nAvailable menu items:")
+show_welcome()
 
-    for number, (item, price) in enumerate(menu_items.items(), start=1):
-        available = stock[item]
-
-        if available == 0:
-            print(f"{number}. {item}: SOLD OUT")
-        else:
-            print(
-                f"{number}. {item}: ${price:.2f} "
-                f"({available} left)"
-            )
-
-    print("0. Finish order")
+age = int(input("Please write your Age: "))
 
 
-def read_item_choice() -> str:
-    """Return a menu item, FINISH, or empty string for invalid input."""
-    raw_choice = input("Enter item number: ").strip()
+def medicalCondition():
+    condition = input(
+        '\nDo you have any medical conditions?'
+        '\nPlease type "yes" or "no": '
+    ).lower().strip()
 
-    if not raw_choice.isdigit():
-        print("Please enter a valid item number.")
-        return ""
+    if condition != "yes" and condition != "no":
+        print("Invalid input. Please enter 'yes' or 'no'.")
 
-    item_number = int(raw_choice)
+    elif age >= 40 and condition == "yes":
+        print("Medical clearance required before joining.")
 
-    if item_number == 0:
-        return "FINISH"
+    elif age < 40 or condition == "no":
+        print("You can proceed with registration.")
 
-    item_names = list(menu_items)
-
-    if item_number < 1 or item_number > len(item_names):
-        print("That number is not on the menu.")
-        return ""
-
-    return item_names[item_number - 1]
+    return condition
 
 
-def read_quantity(item_name: str) -> int | None:
-    """Read a positive quantity that is available in stock."""
-    try:
-        quantity = int(input("Enter quantity: "))
-    except ValueError:
-        print("Please enter a valid whole number.")
-        return None
+if age < 18:
 
-    if quantity <= 0:
-        print("Please enter a positive quantity.")
-        return None
+    print("You are eligible for the Teen Fitness Program.")
 
-    available = stock[item_name]
+elif age >= 18 and age <= 40:
 
-    if quantity > available:
-        print(f"Only {available} {item_name}(s) left.")
-        return None
+    print("You are eligible for the Regular Fitness Program.")
 
-    return quantity
+else:
+    print("You are eligible for the Senior Wellness Program.")
 
 
-def wants_more_items() -> bool:
-    """Ask whether the customer wants to order more items."""
-    while True:
-        print("\nDo you want to add more items?")
-        print("1) Yes")
-        print("2) No")
+condition = medicalCondition()
 
-        choice = input("Enter your choice: ").strip()
+print("\nSelect the membership of your choice:")
+print("1. Basic")
+print("2. Premium")
 
-        if choice == "1":
-            return True
-
-        if choice == "2":
-            return False
-
-        print("Please enter 1 for yes or 2 for no.")
+membershipType = input(
+    "Type '1' for Basic or '2' for Premium: "
+).lower().strip()
 
 
-def take_order() -> None:
-    """Take a customer order and update inventory."""
+def personalTraining(membershipType):
 
-    # Customer information
-    while True:
-        customer_name = input(
-            "\nEnter customer name: "
-        ).strip()
+    if membershipType == "basic" or membershipType == "1":
 
-        if customer_name:
-            break
-
-        print("Please enter your name.")
-
-    print(f"\nWelcome to our cafecito, {customer_name}!")
-
-    # Store purchased items and running total
-    lines: list[tuple[str, int, float]] = []
-    order_total = 0.0
-
-    while True:
-        show_menu()
-
-        item_name = read_item_choice()
-        if item_name == "":
-            continue
-        if item_name == "FINISH":
-            break
-        if stock[item_name] == 0:
-            print(f"Sorry, {item_name} is sold out.")
-            continue
-        quantity = read_quantity(item_name)
-        if quantity is None:
-            continue
-
-        # Arithmetic operator (*) multiplies price by quantity
-        line_cost = menu_items[item_name] * quantity
-
-        # Compound assignment (-=) subtracts purchased stock
-        stock[item_name] -= quantity
-
-        # Compound assignment (+=) adds cost to the running total
-        order_total += line_cost
-
-        # Store the order information
-        lines.append((item_name, quantity, line_cost))
-        print(
-            f"\nAdded {quantity} unit(s) of {item_name}. "
-            f"Line total: ${line_cost:.2f}. "
-            f"{stock[item_name]} left."
-        )
-        if not wants_more_items():
-            break
-
-    # Handle empty orders
-    if not lines:
-        print("\nNo items ordered.")
-        return
-
-    # Display formatted receipt
-    print("\n" + "=" * 35)
-    print("         CAFÉ RECEIPT")
-    print("=" * 35)
-    print(f"Customer: {customer_name}")
-    print("-" * 35)
-
-    for item_name, quantity, line_cost in lines:
-        print(
-            f"{quantity} x {item_name:<18} "
-            f"${line_cost:>6.2f}"
-        )
-
-    print("-" * 35)
-    print(f"TOTAL: ${order_total:.2f}")
-    print("=" * 35)
-
-
-def show_stock() -> None:
-    """Display the remaining inventory."""
-    print("\nStock on hand:")
-
-    for item, remaining in stock.items():
-        print(f"  {item}: {remaining}")
-
-
-def main() -> None:
-    """Keep the cafecito register open for multiple customers."""
-    show_welcome()
-    print(
-        f"Register open. Every item starts "
-        f"with {STARTING_STOCK} in stock."
-    )
-
-    show_stock()
-    while True:
-        take_order()
-        show_stock()
-
-        another = input(
-            "\nServe another customer? (yes/no): "
+        training = input(
+            "Do you want to include personal training? (yes/no): "
         ).lower().strip()
 
-        if another != "yes":
-            print("\nRegister closed. Goodbye!")
-            break
+        if training == "yes":
+            print("Basic plan with personal training: $45 per month.")
+
+        elif training == "no":
+            print("Basic plan: $30 per month.")
+
+        else:
+            print("Invalid input. Please enter 'yes' or 'no'.")
+
+        return training
+
+    elif membershipType == "premium" or membershipType == "2":
+        print("Premium plan: $60 per month.")
+
+    else:
+        print("Error. Please select accordingly.")
 
 
-if __name__ == "__main__":
-    main()
+training = personalTraining(membershipType)
+
+
+if (membershipType == "premium" or membershipType == "2") and age < 30:
+    print("You qualify for a youth discount! 10% off your plan.")
+
+if (membershipType == "basic" or membershipType == "1") and training == "no":
+    print("Consider upgrading to Premium for more benefits!")
+
+if (membershipType == "premium" or membershipType == "2") and condition == "yes":
+    print("We recommend a free consultation before starting.")
